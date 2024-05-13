@@ -1,17 +1,14 @@
+let fs = require("fs");
 const puppeteer = require("puppeteer");
 
 const website = "https://www.instagram.com";
-const uname = "shresthrajgupta";
-const pword = "Quantum@operator123";
-
-function customDelay(time) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, time);
-  });
-}
+const uname = "excitedjerk";
+const pword = "nikalsala";
 
 async function start() {
   try {
+    console.log("Started running script");
+
     // launching browser and going to instagram
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
@@ -27,65 +24,141 @@ async function start() {
     const loginbtn = await page.$('button[type="submit"]');
     await loginbtn.evaluate((loginbtn) => loginbtn.click());
 
-    // just a dummy loop to make the script wait for some time
-    for (let index = 0; index < 5000000000; index++);
+    // dummy fn to make the script wait for some time
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // // get followers and following count
-    // await page.goto(`${website}/${uname}`, { waitUntil: "networkidle0" });
+    // get followers and following count
+    await page.goto(`${website}/${uname}`, { waitUntil: "networkidle0" });
 
-    // const followersElement = await page.waitForSelector(`a[href="/${uname}/followers/"]`);
-    // const followersText = await followersElement.evaluate((ele) => ele.textContent);
-    // const followersCount = parseInt(followersText.replace(/[^0-9]/g, ""), 10);
+    const followersElement = await page.waitForSelector(`a[href="/${uname}/followers/"]`);
+    const followersText = await followersElement.evaluate((ele) => ele.textContent);
+    const followersCount = parseInt(followersText.replace(/[^0-9]/g, ""), 10);
 
-    // const followingElement = await page.waitForSelector(`a[href="/${uname}/following/"]`);
-    // const followingText = await followingElement.evaluate((ele) => ele.textContent);
-    // const followingCount = parseInt(followingText.replace(/[^0-9]/g, ""), 10);
+    const followingElement = await page.waitForSelector(`a[href="/${uname}/following/"]`);
+    const followingText = await followingElement.evaluate((ele) => ele.textContent);
+    const followingCount = parseInt(followingText.replace(/[^0-9]/g, ""), 10);
 
-    // console.log(followersCount, followingCount);
+    console.log(`Followers: ${followersCount}, Following: ${followingCount}`);
 
-    const total = 711;
+    // // going to following page and scrolling till can't no more
+    // await page.waitForSelector(`a[href="/${uname}/following/"]`);
+    // await page.click(`a[href="/${uname}/following/"]`);
 
-    // going to followers page and scrolling till can't no more
-    await page.goto(`${website}/${uname}/followers/`, { waitUntil: "networkidle0" });
+    // await page.waitForSelector("._aade");
 
-    await page.waitForSelector("._aacw");
-    for (let index = 0; index < 5000000000; index++);
+    // let prevFollowingCnt = 0;
+    // let currFollowingCnt = await page.evaluate(() => {
+    //   return document.querySelectorAll("._aano > div > div")[0].children.length;
+    // });
 
-    let followingList = 0;
-    while (followingList < total) {
-      followingList = await page.evaluate(() => {
-        const child = document.querySelectorAll("._aano > div > div")[0];
-        child.lastChild.scrollIntoView();
-        return child.children.length;
+    // console.log("Following details before-" + currFollowingCnt, prevFollowingCnt);
+
+    // while (prevFollowingCnt < currFollowingCnt) {
+    //   prevFollowingCnt = currFollowingCnt;
+
+    //   await page.waitForSelector("._aacw");
+
+    //   await page.evaluate(() => document.querySelectorAll("._aano > div > div")[0].lastChild.scrollIntoView());
+
+    //   await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    //   currFollowingCnt = await page.evaluate(() => {
+    //     return document.querySelectorAll("._aano > div > div")[0].children.length;
+    //   });
+    // }
+
+    // console.log("Following details after-" + currFollowingCnt, prevFollowingCnt);
+
+    // // storing following in an array as well as in a file
+    // const followingList = await page.evaluate(() => {
+    //   const elements = document.querySelectorAll("._aade, ._aad7, ._aacx");
+    //   let arr = [];
+    //   elements.forEach((element) => {
+    //     if (element.textContent !== "Following") arr.push(element.textContent);
+    //   });
+    //   arr.sort();
+    //   return arr;
+    // });
+
+    // // using filestream in case of big arrays
+    // let followingFile = fs.createWriteStream("following.txt", { flags: "w" });
+    // followingFile.on("error", function (err) {
+    //   console.log(error);
+    // });
+    // followingList.forEach(function (v) {
+    //   followingFile.write(v + "\n");
+    // });
+    // followingFile.end();
+
+    // going to follower page and scrolling till can't no more
+    await page.waitForSelector(`a[href="/${uname}/followers/"]`);
+    await page.click(`a[href="/${uname}/followers/"]`);
+
+    await page.waitForSelector("._aade");
+
+    let prevFollowersCnt = 0;
+    let currFollowersCnt = await page.evaluate(() => {
+      return document.querySelectorAll("._aano > div > div")[0]?.children.length === undefined
+        ? 0
+        : document.querySelectorAll("._aano > div > div")[0]?.children.length;
+    });
+
+    console.log("Followers details-" + currFollowersCnt, prevFollowersCnt);
+
+    while (prevFollowersCnt < currFollowersCnt) {
+      prevFollowersCnt = currFollowersCnt;
+
+      await page.waitForSelector("._aacw");
+
+      await page.evaluate(() => document.querySelectorAll("._aano > div > div")[0].lastChild.scrollIntoView());
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      currFollowersCnt = await page.evaluate(() => {
+        return document.querySelectorAll("._aano > div > div")[0].children.length;
       });
-      await customDelay(2000);
     }
+    console.log("Followers details-" + currFollowersCnt, prevFollowersCnt);
 
-    console.log(followingList);
+    // storing followers in an array as well as in a file
+    const followersList = await page.evaluate(() => {
+      const elements = document.querySelectorAll("._aade, ._aad7, ._aacx");
 
-    // const child = await page.evaluate(() => {
-    //   const divElement = document.querySelector("._aano > div > div");
-    //   // console.log(divElement);
+      let flag = false;
+      let suggestedEle;
+      const checkflag = document.querySelectorAll(".x18hxmgj");
+      checkflag.forEach((ele) => {
+        if (ele.textContent === "Suggested for you") {
+          flag = true;
+          suggestedEle = ele;
+        }
+      });
 
-    //   return divElement.children.length
-    // });
-    // let len = await page.evaluate(() => {
-    //   return child.children.length
-    // })
+      let arr = [];
+      elements.forEach((element) => {
+        if (element.textContent !== "Following" && element.textContent !== "Follow") {
+          if (flag) {
+            if (element.offsetTop < suggestedEle.offsetTop) arr.push(element.textContent);
+          } else {
+            arr.push(element.textContent);
+          }
+        }
+      });
+      arr.sort();
+      return arr;
+    });
 
-    // console.log(child);
+    // using filestream in case of big arrays
+    let followersFile = fs.createWriteStream("followers.txt", { flags: "w" });
+    followersFile.on("error", function (err) {
+      console.log(error);
+    });
+    followersList.forEach(function (v) {
+      followersFile.write(v + "\n");
+    });
+    followersFile.end();
 
-    // for (let index = 0; index < 10000000000; index++);
-
-    // const followersbox = await page.$(
-    //   'div[style="display: flex; flex-direction: column; padding-bottom: 0px; padding-top: 0px; position: relative;"]'
-    // );
-
-    // await page.evaluate(() => {
-    //   window.scrollTo(0, document.body.scrollHeight);
-    // });
-
-    // for (let index = 0; index < 10000000000; index++);
+    console.log("Ended running script");
 
     // await browser.close();
   } catch (error) {
@@ -94,18 +167,3 @@ async function start() {
 }
 
 start();
-
-/*
-var links = document.querySelectorAll('a[class="x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz notranslate _a6hd" ]');
-var urls = [];
-for (let link of links) {
-    urls.push(link.getAttribute('href'));
-}
-console.log(urls.join('\n'));
-*/
-
-/*
-let divElement = document.getElementsByClassName('_aano');
-let child = divElement[0].children[0].children[0];
-child.lastChild.scrollIntoView();
-*/
