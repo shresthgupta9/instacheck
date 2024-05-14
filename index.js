@@ -42,8 +42,8 @@ async function start() {
 
 		console.log("launching browser and going to instagram");
 
-		// const browser = await puppeteer.launch();
-		const browser = await puppeteer.launch({ headless: false });
+		const browser = await puppeteer.launch();
+		// const browser = await puppeteer.launch({ headless: false });
 		const page = await browser.newPage();
 		await page.goto(website, { waitUntil: "networkidle0" });
 
