@@ -108,7 +108,7 @@ async function start() {
 
 			await page.evaluate(() => document.querySelectorAll("._aano > div > div")[0].lastChild.scrollIntoView());
 
-			await new Promise((resolve) => setTimeout(resolve, 3000));
+			await new Promise((resolve) => setTimeout(resolve, 2500));
 
 			currFollowingCnt = await page.evaluate(() => {
 				return document.querySelector("._aano > div > div").children.length;
@@ -183,7 +183,7 @@ async function start() {
 
 			await page.evaluate(() => document.querySelectorAll("._aano > div > div")[0].lastChild.scrollIntoView());
 
-			await new Promise((resolve) => setTimeout(resolve, 3000));
+			await new Promise((resolve) => setTimeout(resolve, 2500));
 
 			currFollowersCnt = await page.evaluate(() => {
 				return document.querySelectorAll("._aano > div > div")[0].children.length;
